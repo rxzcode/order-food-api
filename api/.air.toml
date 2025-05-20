@@ -1,0 +1,9 @@
+root = "."
+tmp_dir = "runtime/air"
+
+[build]
+  cmd = "go build -o ./runtime/air/main main.go"
+  bin = "runtime/air/main"
+  full_bin = "runtime/air/main"
+  include_ext = ["go", "ini"]
+  exclude_dir = ["runtime", "vendor"]

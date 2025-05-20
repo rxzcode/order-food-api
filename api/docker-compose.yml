@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: orderdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./runtime/dbdata:/var/lib/mysql
+
+  api-dev:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    profiles:
+      - dev
+    command: air
+
+  api-prod:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    profiles:
+      - prod
+
+volumes:
+  dbdata:
