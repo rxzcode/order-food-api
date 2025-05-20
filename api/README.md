@@ -12,6 +12,17 @@ make run
 
 ### Without docker
 Edit config.ini (dev)
+```ini
+[Database]
+User = root
+Password = secret
+Host = localhost
+Port = 3306
+Name = orderdb
+```
+
+Run
 ```sh
-go run main.go
+go get
+air
 ```
