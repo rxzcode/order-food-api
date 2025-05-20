@@ -32,5 +32,5 @@ func main() {
 		api.POST("/order", middleware.APIKeyAuth(), handle.PlaceOrder())
 	}
 
-	r.Run(":8080")
+	r.Run(":" + cfg.App.Port)
 }

@@ -6,6 +6,10 @@ import (
 	"gopkg.in/ini.v1"
 )
 
+type AppConfig struct {
+	Port string
+}
+
 type DBConfig struct {
 	User     string
 	Password string
@@ -19,6 +23,7 @@ type AuthConfig struct {
 }
 
 type Config struct {
+	App      AppConfig
 	Database DBConfig
 	Auth     AuthConfig
 }
