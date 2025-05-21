@@ -15,7 +15,7 @@ Compare RAM on cache types
 |-----------------|----------------|-------|
 | ConcurrentMap   | 17,313.89      |       |
 | MPH             | 11,238.68      |       |
-| BloomFilter     | 1098.86        | 0.001% (failed rate) |
+| BloomFilter     | 896.80         | 0.001% (failed positive rate) |
 
 ### With docker
 #### Run dev with watch files and auto restart
