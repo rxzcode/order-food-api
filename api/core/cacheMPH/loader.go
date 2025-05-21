@@ -27,7 +27,7 @@ type fileChunk struct {
 	lines    []string
 }
 
-func NewCache() *Loader {
+func New() *Loader {
 	return &Loader{
 		fileTables: make(map[string][]*mph.Table),
 		lineChan:   make(chan fileChunk, workerCount*2),

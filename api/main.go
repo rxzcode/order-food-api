@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
@@ -10,9 +9,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	cache "order-food-api/core/cacheBloomFilter"
+	cache "order-food-api/core/cacheBitmap"
+	// cache "order-food-api/core/cacheBloomFilter"
 	// cache "order-food-api/core/cacheMPH"
 	// cache "order-food-api/core/cacheMap"
+	// cache "order-food-api/core/search"
+
 	"order-food-api/core/config"
 	"order-food-api/core/database"
 	"order-food-api/handlers"
@@ -29,11 +31,9 @@ func main() {
 	}
 
 	files := []string{"./files/couponbase1.gz", "./files/couponbase2.gz", "./files/couponbase3.gz"}
-	couponCache := cache.NewCache()
+	couponCache := cache.New()
 	go func() {
-		if err := couponCache.LoadFiles(files); err != nil {
-			log.Fatal(err)
-		}
+		couponCache.LoadFiles(files)
 	}()
 
 	cfg := config.LoadConfig(filepath.Join(absPath, "config.ini"))

@@ -26,7 +26,7 @@ type fileChunk struct {
 	lines    []string
 }
 
-func NewCache() *Loader {
+func New() *Loader {
 	workerTables := make([]map[string]map[string]struct{}, workerCount)
 	for i := 0; i < workerCount; i++ {
 		workerTables[i] = make(map[string]map[string]struct{})

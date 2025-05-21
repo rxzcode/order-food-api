@@ -3,15 +3,18 @@ module order-food-api
 go 1.24
 
 require (
+	github.com/RoaringBitmap/roaring/v2 v2.5.0
+	github.com/bits-and-blooms/bloom/v3 v3.7.0
+	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	gorm.io/driver/mysql v1.5.0
 	gorm.io/gorm v1.25.4
 )
 
 require (
-	github.com/bits-and-blooms/bitset v1.10.0 // indirect
-	github.com/bits-and-blooms/bloom/v3 v3.7.0 // indirect
+	github.com/bits-and-blooms/bitset v1.12.0 // indirect
+	github.com/mschoch/smat v0.2.0 // indirect
 )
 
 require (
