@@ -1,4 +1,4 @@
-package cacheBloomFilter
+package cacheMap
 
 import (
 	"bufio"
@@ -13,14 +13,13 @@ import (
 )
 
 const (
-	chunkSize          = 5_000_000
-	workerCount        = 32
-	bloomExpectedItems = 10_000_000
-	bloomFalsePositive = 0.00001
+	chunkSize      = 5_000_000 // lines per chunk (adjust as needed)
+	workerCount    = 32        // concurrency level
+	bloomFalseRate = 0.00001   // false positive rate per bloom filter
 )
 
 type Loader struct {
-	workerTables []map[string]*bloom.BloomFilter
+	workerTables []map[string][]*bloom.BloomFilter // worker -> file -> list of chunk bloom filters
 	lineChan     chan fileChunk
 	wg           sync.WaitGroup
 }
@@ -31,9 +30,9 @@ type fileChunk struct {
 }
 
 func NewCache() *Loader {
-	workerTables := make([]map[string]*bloom.BloomFilter, workerCount)
+	workerTables := make([]map[string][]*bloom.BloomFilter, workerCount)
 	for i := 0; i < workerCount; i++ {
-		workerTables[i] = make(map[string]*bloom.BloomFilter)
+		workerTables[i] = make(map[string][]*bloom.BloomFilter)
 	}
 
 	return &Loader{
@@ -90,19 +89,15 @@ func (l *Loader) loadFile(path string) error {
 		copy(copyChunk, chunk)
 		l.lineChan <- fileChunk{fileName: path, lines: copyChunk}
 	}
+
 	return scanner.Err()
 }
 
-func (l *Loader) worker(localMap map[string]*bloom.BloomFilter) {
+func (l *Loader) worker(localMap map[string][]*bloom.BloomFilter) {
 	defer l.wg.Done()
 
 	for job := range l.lineChan {
-		filter, ok := localMap[job.fileName]
-		if !ok {
-			filter = bloom.NewWithEstimates(bloomExpectedItems, bloomFalsePositive)
-			localMap[job.fileName] = filter
-		}
-
+		filter := bloom.NewWithEstimates(uint(len(job.lines)), bloomFalseRate)
 		for _, line := range job.lines {
 			code := strings.TrimSpace(line)
 			if code != "" {
@@ -110,25 +105,31 @@ func (l *Loader) worker(localMap map[string]*bloom.BloomFilter) {
 			}
 		}
 
+		localMap[job.fileName] = append(localMap[job.fileName], filter)
+
 		fmt.Printf("Loaded chunk for %s with %d codes\n", filepath.Base(job.fileName), len(job.lines))
 	}
 }
 
+// AppearsInAtLeastN returns true if code appears in at least n different files.
 func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
-	seen := 0
-	checked := make(map[string]struct{})
+	seenFiles := make(map[string]struct{})
 
 	for _, workerMap := range l.workerTables {
-		for file, filter := range workerMap {
-			if _, ok := checked[file]; ok {
+		for file, filters := range workerMap {
+			if _, already := seenFiles[file]; already {
 				continue
 			}
-			checked[file] = struct{}{}
-			if filter.TestString(code) {
-				seen++
-				if seen >= n {
-					return true
+
+			for _, filter := range filters {
+				if filter.TestString(code) {
+					seenFiles[file] = struct{}{}
+					break
 				}
+			}
+
+			if len(seenFiles) >= n {
+				return true
 			}
 		}
 	}
