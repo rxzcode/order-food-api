@@ -131,3 +131,5 @@ dist
 
 # Run files
 runtime
+api/files/**
+!api/files/.keep
