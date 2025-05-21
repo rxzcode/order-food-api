@@ -7,7 +7,8 @@ After start, server will load file to cache for coupon check
 ![Load done](assets/loaddone.png)
 
 After cache, can check coupon when create order
-![Load done](assets/order-openapi.png)
+![Load done](assets/order-openapi-01.png)
+![Load done](assets/order-openapi-02.png)
 
 Compare RAM on cache types
 
