@@ -1,18 +1,19 @@
 package mph
 
 import (
+	"hash/fnv"
 	"sort"
 )
 
 const maxSeedAttempts = 1_000_000 // Prevent infinite seed search
 
 type Table struct {
-	keys       []string
-	level0     []uint32
-	level0Mask int
-	level1     []uint32
-	level1Mask int
-	Extra      []string
+	level0       []uint32
+	level0Mask   int
+	level1       []uint32
+	level1Mask   int
+	fingerprints []uint64 // fingerprint per key stored by index (level1[n])
+	extra        []uint64 // fingerprint for extra keys
 }
 
 func Build(keys []string) *Table {
@@ -28,6 +29,12 @@ func Build(keys []string) *Table {
 
 	sparseBuckets := make([][]int, len(level0))
 	zeroSeed := murmurSeed(0)
+
+	// Precompute fingerprint for all keys (64-bit FNV-1a)
+	fingerprints := make([]uint64, len(keys))
+	for i, k := range keys {
+		fingerprints[i] = fnvHash64(k)
+	}
 
 	// Assign each key to a bucket in level0
 	for i, s := range keys {
@@ -47,7 +54,8 @@ func Build(keys []string) *Table {
 	// Occupancy tracker for level1
 	occ := make([]bool, len(level1))
 	var tmpOcc []int
-	var extra []string
+
+	var extra []uint64
 
 	for _, bucket := range buckets {
 		var seed murmurSeed
@@ -81,37 +89,58 @@ func Build(keys []string) *Table {
 		}
 
 		if !found {
-			// log.Printf("Bucket %d failed, falling back to extra store (size %d)", bucket.n, len(bucket.vals))
+			// Put all keys from bucket to extra (fingerprints only)
 			for _, i := range bucket.vals {
-				extra = append(extra, keys[i])
+				extra = append(extra, fingerprints[i])
 			}
 		}
 	}
 
 	return &Table{
-		keys:       keys,
-		level0:     level0,
-		level0Mask: level0Mask,
-		level1:     level1,
-		level1Mask: level1Mask,
-		Extra:      extra,
+		level0:       level0,
+		level0Mask:   level0Mask,
+		level1:       level1,
+		level1Mask:   level1Mask,
+		fingerprints: fingerprints,
+		extra:        extra,
 	}
 }
 
 func nextPow2(n int) int {
-	for i := 1; ; i *= 2 {
+	for i := 1; ; i <<= 1 {
 		if i >= n {
 			return i
 		}
 	}
 }
 
+// Lookup returns the index and true if key is found
 func (t *Table) Lookup(s string) (n uint32, ok bool) {
 	i0 := int(murmurSeed(0).hash(s)) & t.level0Mask
 	seed := t.level0[i0]
 	i1 := int(murmurSeed(seed).hash(s)) & t.level1Mask
 	n = t.level1[i1]
-	return n, s == t.keys[int(n)]
+
+	fp := fnvHash64(s)
+	if n < uint32(len(t.fingerprints)) && t.fingerprints[n] == fp {
+		return n, true
+	}
+
+	// fallback: check in extra
+	for _, efp := range t.extra {
+		if efp == fp {
+			return 0, true
+		}
+	}
+
+	return 0, false
+}
+
+// fnvHash64 computes 64-bit FNV-1a hash (fast, good enough fingerprint)
+func fnvHash64(s string) uint64 {
+	h := fnv.New64a()
+	h.Write([]byte(s))
+	return h.Sum64()
 }
 
 type indexBucket struct {
@@ -124,3 +153,6 @@ type bySize []indexBucket
 func (s bySize) Len() int           { return len(s) }
 func (s bySize) Less(i, j int) bool { return len(s[i].vals) > len(s[j].vals) }
 func (s bySize) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+
+// MurmurSeed and its hash method are assumed to be defined exactly as before,
+// unchanged from your original code.

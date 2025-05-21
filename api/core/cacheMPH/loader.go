@@ -94,8 +94,8 @@ func (l *Loader) worker() {
 		l.fileTables[job.fileName] = append(l.fileTables[job.fileName], table)
 		l.mu.Unlock()
 
-		fmt.Printf("Built table for %s with %d entries, %d extra\n",
-			filepath.Base(job.fileName), len(job.lines), len(table.Extra))
+		fmt.Printf("Built table for %s with %d entries\n",
+			filepath.Base(job.fileName), len(job.lines))
 	}
 }
 
@@ -113,12 +113,6 @@ func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
 			if _, ok := t.Lookup(code); ok {
 				found = true
 				break
-			}
-			for _, e := range t.Extra {
-				if e == code {
-					found = true
-					break
-				}
 			}
 			if found {
 				break

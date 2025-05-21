@@ -14,7 +14,7 @@ Compare RAM on cache types
 | Cache Type      | RAM Usage (MB) | Extra |
 |-----------------|----------------|-------|
 | ConcurrentMap   | 17,313.89      |       |
-| MPH             | 11,238.68      |       |
+| MPH             | 4890.84        |       |
 | BloomFilter     | 896.80         | 0.001% (failed positive rate) |
 
 ### With docker
