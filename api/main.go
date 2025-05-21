@@ -30,9 +30,11 @@ func main() {
 
 	files := []string{"./files/couponbase1.gz", "./files/couponbase2.gz", "./files/couponbase3.gz"}
 	couponCache := cache.NewCache()
-	if err := couponCache.LoadFiles(files); err != nil {
-		log.Fatal(err)
-	}
+	go func() {
+		if err := couponCache.LoadFiles(files); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	cfg := config.LoadConfig(filepath.Join(absPath, "config.ini"))
 	db := database.Connect(cfg.Database)
