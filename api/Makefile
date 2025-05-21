@@ -3,6 +3,9 @@
 build:
 	docker-compose build
 
+db:
+	docker-compose up -d db
+
 dev:
 	docker-compose --profile dev up
 

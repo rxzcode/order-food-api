@@ -1,12 +1,12 @@
-package loader
+package cacheMap
 
 import (
 	"bufio"
 	"compress/gzip"
 	"fmt"
-	"order-food-api/core/mph"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -16,10 +16,9 @@ const (
 )
 
 type Loader struct {
-	mu         sync.Mutex
-	fileTables map[string][]*mph.Table // file -> tables
-	wg         sync.WaitGroup
-	lineChan   chan fileChunk
+	workerTables []map[string]map[string]struct{} // [worker]file -> set of codes
+	lineChan     chan fileChunk
+	wg           sync.WaitGroup
 }
 
 type fileChunk struct {
@@ -27,20 +26,22 @@ type fileChunk struct {
 	lines    []string
 }
 
-// NewLoader initializes a Loader.
-func NewLoader() *Loader {
+func NewCache() *Loader {
+	workerTables := make([]map[string]map[string]struct{}, workerCount)
+	for i := 0; i < workerCount; i++ {
+		workerTables[i] = make(map[string]map[string]struct{})
+	}
+
 	return &Loader{
-		fileTables: make(map[string][]*mph.Table),
-		lineChan:   make(chan fileChunk, workerCount*2),
+		workerTables: workerTables,
+		lineChan:     make(chan fileChunk, workerCount*2),
 	}
 }
 
-// LoadFiles loads and builds MPH tables from a list of gzipped text files.
 func (l *Loader) LoadFiles(files []string) error {
-	// Start worker pool
 	for i := 0; i < workerCount; i++ {
 		l.wg.Add(1)
-		go l.worker()
+		go l.worker(l.workerTables[i])
 	}
 
 	for _, file := range files {
@@ -88,50 +89,41 @@ func (l *Loader) loadFile(path string) error {
 	return scanner.Err()
 }
 
-func (l *Loader) worker() {
+func (l *Loader) worker(localMap map[string]map[string]struct{}) {
 	defer l.wg.Done()
+
 	for job := range l.lineChan {
-		table := mph.Build(job.lines)
+		codes, ok := localMap[job.fileName]
+		if !ok {
+			codes = make(map[string]struct{})
+			localMap[job.fileName] = codes
+		}
 
-		l.mu.Lock()
-		l.fileTables[job.fileName] = append(l.fileTables[job.fileName], table)
-		l.mu.Unlock()
-
-		fmt.Printf("Built table for %s with %d entries, %d extra\n",
-			filepath.Base(job.fileName), len(job.lines), len(table.Extra))
-	}
-}
-
-// AppearsInAtLeastN checks if the code exists in at least N different files.
-func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
-	count := 0
-
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	for _, tables := range l.fileTables {
-		found := false
-
-		for _, t := range tables {
-			if _, ok := t.Lookup(code); ok {
-				found = true
-				break
-			}
-			for _, e := range t.Extra {
-				if e == code {
-					found = true
-					break
-				}
-			}
-			if found {
-				break
+		for _, line := range job.lines {
+			code := strings.TrimSpace(line)
+			if code != "" {
+				codes[code] = struct{}{}
 			}
 		}
 
-		if found {
-			count++
-			if count >= n {
-				return true
+		fmt.Printf("Loaded chunk for %s with %d codes\n", filepath.Base(job.fileName), len(job.lines))
+	}
+}
+
+// AppearsInAtLeastN checks if the code appears in at least N different files.
+func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
+	seenFiles := make(map[string]struct{})
+
+	for _, workerMap := range l.workerTables {
+		for file, codes := range workerMap {
+			if _, alreadyCounted := seenFiles[file]; alreadyCounted {
+				continue
+			}
+			if _, ok := codes[code]; ok {
+				seenFiles[file] = struct{}{}
+				if len(seenFiles) >= n {
+					return true
+				}
 			}
 		}
 	}

@@ -9,6 +9,15 @@ After start, server will load file to cache for coupon check
 After cache, can check coupon when create order
 ![Load done](assets/order-openapi.png)
 
+Compare RAM on cache types
+ConcurrentMap 17313.89 MB
+MPH 11238.68 MB## RAM Usage Comparison
+
+| Cache Type      | RAM Usage (MB) |
+|-----------------|----------------|
+| ConcurrentMap   | 17,313.89      |
+| MPH             | 11,238.68      |
+
 ### With docker
 #### Run dev with watch files and auto restart
 ```sh

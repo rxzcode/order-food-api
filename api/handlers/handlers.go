@@ -1,14 +1,16 @@
 package handlers
 
 import (
-	"order-food-api/core/loader"
-
 	"gorm.io/gorm"
 )
 
+type Cache interface {
+	AppearsInAtLeastN(code string, n int) bool
+}
+
 type InfoOption struct {
 	BasePath    string
-	CouponCache *loader.Loader
+	CouponCache Cache
 }
 
 type Option func(*Handler)
