@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -12,6 +13,10 @@ import (
 )
 
 func Connect(dbCfg config.DBConfig) *gorm.DB {
+	if dbCfg.Host == "db" && os.Getenv("RUNNING_IN_DOCKER") != "true" {
+		dbCfg.Host = "localhost"
+	}
+
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbCfg.User, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name)
 

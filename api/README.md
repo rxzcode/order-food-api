@@ -9,6 +9,7 @@ After start, server will load file to cache for coupon check
 After cache, can check coupon when create order
 ![Load done](assets/order-openapi-01.png)
 ![Load done](assets/order-openapi-02.png)
+![Load done](assets/docker-run.png)
 
 Compare RAM on cache types
 

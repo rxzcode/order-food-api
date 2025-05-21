@@ -15,6 +15,8 @@ services:
     build:
       context: .
       target: dev
+    environment:
+      RUNNING_IN_DOCKER: true
     ports:
       - "8080:8080"
     volumes:
@@ -29,6 +31,8 @@ services:
     build:
       context: .
       target: prod
+    environment:
+      RUNNING_IN_DOCKER: true
     ports:
       - "8080:8080"
     depends_on:
