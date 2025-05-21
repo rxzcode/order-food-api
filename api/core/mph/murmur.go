@@ -1,6 +1,7 @@
 package mph
 
 import (
+	"encoding/binary"
 	"reflect"
 	"unsafe"
 )
@@ -21,6 +22,27 @@ const (
 	m       = 5
 	n       = 0xe6546b64
 )
+
+// murmur3 32-bit finalizer for uint64 key input.
+func (m murmurSeed) hashUint64(key uint64) uint32 {
+	// Use seed + key bytes as input to Murmur3-like hash
+
+	// Convert uint64 key to 8 bytes
+	var buf [8]byte
+	binary.LittleEndian.PutUint64(buf[:], key)
+
+	h := uint32(m)
+	for _, b := range buf {
+		h ^= uint32(b)
+		h *= 0x5bd1e995
+		h ^= h >> 15
+	}
+	// Final avalanche
+	h ^= h >> 13
+	h *= 0x5bd1e995
+	h ^= h >> 15
+	return h
+}
 
 // hash computes the 32-bit Murmur3 hash of s using ms as the seed.
 func (ms murmurSeed) hash(s string) uint32 {
