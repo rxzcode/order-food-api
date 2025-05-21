@@ -18,7 +18,7 @@ Compare RAM on cache types
 | ConcurrentMap   | 17,313.89      |       |
 | MPH             | 4852.04        | with <=10 chars length code   |
 | BloomFilter     | 896.80         | 0.001% (failed positive rate) |
-| Bitmap          | 965.04         |       |
+| Bitmap          | 965.04         | collition rate |
 
 ### With docker
 #### Run dev with watch files and auto restart

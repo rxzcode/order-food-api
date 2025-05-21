@@ -30,7 +30,6 @@ type Loader struct {
 	fileBitmapsM sync.Mutex
 }
 
-// New returns a new loader
 func New() *Loader {
 	return &Loader{
 		lineChan:    make(chan fileChunk, workerCount*2),
@@ -38,7 +37,6 @@ func New() *Loader {
 	}
 }
 
-// LoadFiles reads all files in chunks using gzip scanner and feeds to workers
 func (l *Loader) LoadFiles(files []string) error {
 	for i := 0; i < workerCount; i++ {
 		l.wg.Add(1)
@@ -56,7 +54,6 @@ func (l *Loader) LoadFiles(files []string) error {
 	return nil
 }
 
-// Reads a .gz file in chunks and sends them to lineChan
 func (l *Loader) loadFileChunks(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
@@ -94,7 +91,6 @@ func (l *Loader) sendChunk(fileName string, lines []string) {
 	l.lineChan <- fileChunk{fileName: fileName, lines: copyLines}
 }
 
-// Each worker consumes chunks and builds partial bitmap, merges into file-level bitmap
 func (l *Loader) worker() {
 	defer l.wg.Done()
 
@@ -120,7 +116,6 @@ func (l *Loader) worker() {
 	}
 }
 
-// AppearsInAtLeastN returns true if code appears in at least n files
 func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
 	id := hashToUint32(code)
 
