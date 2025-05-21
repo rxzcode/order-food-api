@@ -36,3 +36,8 @@ Run
 go get
 air
 ```
+
+Or
+```sh
+go run main.go
+```
