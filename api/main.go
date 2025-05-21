@@ -1,31 +1,62 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"path/filepath"
+	"runtime"
+	"runtime/debug"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"order-food-api/core/config"
 	"order-food-api/core/database"
+	"order-food-api/core/loader"
 	"order-food-api/handlers"
 	"order-food-api/middleware"
 	"order-food-api/models"
 )
 
 func main() {
-	absPath, err := filepath.Abs("./config.ini")
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+			allocMB := float64(m.Alloc) / 1024 / 1024
+			totalMB := float64(m.TotalAlloc) / 1024 / 1024
+			sysMB := float64(m.Sys) / 1024 / 1024
+			numGC := m.NumGC
+			numGoroutine := runtime.NumGoroutine()
+			numCPU := runtime.NumCPU()
+			fmt.Printf("[STATS] Goroutines: %d | CPUs: %d | Alloc: %.2f MB | TotalAlloc: %.2f MB | Sys: %.2f MB | GCs: %d\n",
+				numGoroutine, numCPU, allocMB, totalMB, sysMB, numGC)
+			debug.FreeOSMemory()
+		}
+	}()
+
+	absPath, err := filepath.Abs(".")
 	if err != nil {
-		panic("Failed to get absolute path to config.ini: " + err.Error())
+		panic("Failed to get absolute path of program: " + err.Error())
 	}
 
-	cfg := config.LoadConfig(absPath)
+	files := []string{"./files/couponbase1.gz", "./files/couponbase2.gz", "./files/couponbase3.gz"}
+	l := loader.NewLoader()
+	if err := l.LoadFiles(files); err != nil {
+		log.Fatal(err)
+	}
+
+	cfg := config.LoadConfig(filepath.Join(absPath, "config.ini"))
 	db := database.Connect(cfg.Database)
 	db.AutoMigrate(&models.Product{}, &models.Order{}, &models.OrderItem{})
 
 	r := gin.Default()
 	api := r.Group("/api")
 	{
-		handle := handlers.NewHandler(handlers.WithDB(db))
+		handle := handlers.NewHandler(handlers.WithDB(db), handlers.WithInfo(handlers.InfoOption{BasePath: absPath, CouponCache: l}))
 		api.GET("/product", handle.ListProducts())
 		api.GET("/product/:productId", handle.GetProduct())
 		api.POST("/product", middleware.APIKeyAuth(), handle.CreateProduct())

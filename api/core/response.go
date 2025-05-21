@@ -16,10 +16,17 @@ type SuccessResponse struct {
 }
 
 func RespondError(c *gin.Context, status int, msg string, err error) {
-	c.AbortWithStatusJSON(status, ErrorResponse{
-		Message: msg,
-		Error:   err.Error(),
-	})
+	if err != nil {
+		c.AbortWithStatusJSON(status, ErrorResponse{
+			Message: msg,
+			Error:   err.Error(),
+		})
+	} else {
+		c.AbortWithStatusJSON(status, ErrorResponse{
+			Message: msg,
+		})
+	}
+
 }
 
 func RespondSuccess(c *gin.Context, data interface{}) {

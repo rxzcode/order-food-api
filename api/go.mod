@@ -10,6 +10,11 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/edsrzf/mmap-go v1.2.0 // indirect
+)
+
+require (
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
