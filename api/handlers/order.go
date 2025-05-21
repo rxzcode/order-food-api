@@ -45,7 +45,7 @@ func (h *Handler) PlaceOrder() gin.HandlerFunc {
 		// }
 
 		// METHOD 02: Verify coupon by cache
-		if !h.Info.CouponCache.AppearsInAtLeastN(req.CouponCode, 1) {
+		if !h.Info.CouponCache.AppearsInAtLeastN(req.CouponCode, 2) {
 			core.RespondError(c, http.StatusBadRequest, ErrOrderInvalidInput, nil)
 			return
 		}

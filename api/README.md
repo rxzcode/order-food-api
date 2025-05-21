@@ -10,13 +10,12 @@ After cache, can check coupon when create order
 ![Load done](assets/order-openapi.png)
 
 Compare RAM on cache types
-ConcurrentMap 17313.89 MB
-MPH 11238.68 MB## RAM Usage Comparison
 
-| Cache Type      | RAM Usage (MB) |
-|-----------------|----------------|
-| ConcurrentMap   | 17,313.89      |
-| MPH             | 11,238.68      |
+| Cache Type      | RAM Usage (MB) | Extra |
+|-----------------|----------------|-------|
+| ConcurrentMap   | 17,313.89      |       |
+| MPH             | 11,238.68      |       |
+| BloomFilter     | 1098.86        | 0.001% (failed rate) |
 
 ### With docker
 #### Run dev with watch files and auto restart
