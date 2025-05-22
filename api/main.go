@@ -9,12 +9,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	cache "order-food-api/core/cacheBloomFilter"
-	// cache "order-food-api/core/cacheMPH"
-	// cache "order-food-api/core/cacheTrie"
-	// cache "order-food-api/core/cacheBitmap"
+	// cache "order-food-api/core/cacheBloomFilter"
+	cache "order-food-api/core/cacheSlice"
 	// cache "order-food-api/core/cacheMap"
+	// cache "order-food-api/core/cacheMPH"
+
+	// cache "order-food-api/core/cacheBitmap"
 	// cache "order-food-api/core/search"
+	// cache "order-food-api/core/cacheTrie"
 
 	"order-food-api/core/config"
 	"order-food-api/core/database"
