@@ -1,4 +1,4 @@
-package mphkey
+package shardslice
 
 const maxSeedAttempts = 1_000_000
 

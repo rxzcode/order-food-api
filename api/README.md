@@ -14,13 +14,14 @@ After cache, can check coupon when create order
 
 Compare RAM on cache types
 
-| Cache Type    | RAM Usage (MB) | Extra                                      |
-| ------------- | -------------- | ------------------------------------------ |
-| ConcurrentMap | 6030.48        |                                            |
-| MPH           | 4850.74        | with <=10 chars length code, perfect index |
-| Shard Slice   | 2390.66        | with <=10 chars length code                |
-| BloomFilter   | 896.80         | 0.001% (failed positive rate)              |
-| Bitmap        | 965.04         | collition rate                             |
+| Cache Type          | RAM Usage (MB) | Extra                                      |
+| ------------------- | -------------- | ------------------------------------------ |
+| ConcurrentMap       | 6030.48        |                                            |
+| MPH                 | 4850.74        | with <=10 chars length code, perfect index |
+| Shard Slice         | 2390.66        | with <=10 chars length code                |
+| Shard Slice Persist | 1.86           | Use glob, 2-3s latency, can cache warmdata |
+| BloomFilter         | 896.80         | 0.001% (failed positive rate)              |
+| Bitmap              | 965.04         | collition rate                             |
 
 Note: With uint64 only encode 10 chars 0-9,A-Z
 

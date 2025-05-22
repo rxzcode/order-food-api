@@ -1,4 +1,4 @@
-package cacheMPH
+package cacheTrie
 
 import (
 	"bufio"

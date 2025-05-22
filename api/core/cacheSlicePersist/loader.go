@@ -1,10 +1,10 @@
-package cacheSlice
+package cacheSlicePersist
 
 import (
 	"bufio"
 	"compress/gzip"
 	"fmt"
-	"order-food-api/core/shardslice"
+	shardslice "order-food-api/core/shardslicePersist"
 	"os"
 	"path/filepath"
 	"sync"
