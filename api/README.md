@@ -17,7 +17,7 @@ Compare RAM on cache types
 | Cache Type    | RAM Usage (MB) | Extra                         |
 | ------------- | -------------- | ----------------------------- |
 | ConcurrentMap | 6030.48        |                               |
-| MPH           | 4852.04        | with <=10 chars length code   |
+| MPH           | 2390.74        | with <=10 chars length code   |
 | BloomFilter   | 896.80         | 0.001% (failed positive rate) |
 | Bitmap        | 965.04         | collition rate                |
 
