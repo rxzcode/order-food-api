@@ -12,7 +12,7 @@ import (
 
 const (
 	chunkSize   = 5_000_000
-	workerCount = 32
+	workerCount = 16
 )
 
 type Loader struct {
@@ -94,12 +94,11 @@ func (l *Loader) worker() {
 		l.fileTables[job.fileName] = append(l.fileTables[job.fileName], table)
 		l.mu.Unlock()
 
-		fmt.Printf("Built table for %s with %d entries\n",
-			filepath.Base(job.fileName), len(job.lines))
+		fmt.Printf("Built table for %s with %d entries %d extras\n",
+			filepath.Base(job.fileName), len(job.lines), len(table.Extra))
 	}
 }
 
-// AppearsInAtLeastN checks if the code exists in at least N different files.
 func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
 	count := 0
 

@@ -15,8 +15,16 @@ const (
 	workerCount = 32
 )
 
+type CodeKey [10]byte
+
+func toCodeKey(s string) CodeKey {
+	var key CodeKey
+	copy(key[:], s)
+	return key
+}
+
 type Loader struct {
-	workerTables []map[string]map[string]struct{} // [worker]file -> set of codes
+	workerTables []map[string]map[CodeKey]struct{}
 	lineChan     chan fileChunk
 	wg           sync.WaitGroup
 }
@@ -27,9 +35,9 @@ type fileChunk struct {
 }
 
 func New() *Loader {
-	workerTables := make([]map[string]map[string]struct{}, workerCount)
+	workerTables := make([]map[string]map[CodeKey]struct{}, workerCount)
 	for i := 0; i < workerCount; i++ {
-		workerTables[i] = make(map[string]map[string]struct{})
+		workerTables[i] = make(map[string]map[CodeKey]struct{})
 	}
 
 	return &Loader{
@@ -89,20 +97,20 @@ func (l *Loader) loadFile(path string) error {
 	return scanner.Err()
 }
 
-func (l *Loader) worker(localMap map[string]map[string]struct{}) {
+func (l *Loader) worker(localMap map[string]map[CodeKey]struct{}) {
 	defer l.wg.Done()
 
 	for job := range l.lineChan {
 		codes, ok := localMap[job.fileName]
 		if !ok {
-			codes = make(map[string]struct{})
+			codes = make(map[CodeKey]struct{})
 			localMap[job.fileName] = codes
 		}
 
 		for _, line := range job.lines {
 			code := strings.TrimSpace(line)
-			if code != "" {
-				codes[code] = struct{}{}
+			if code != "" && len(code) <= 10 {
+				codes[toCodeKey(code)] = struct{}{}
 			}
 		}
 
@@ -110,8 +118,12 @@ func (l *Loader) worker(localMap map[string]map[string]struct{}) {
 	}
 }
 
-// AppearsInAtLeastN checks if the code appears in at least N different files.
 func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
+	if code == "" || len(code) > 10 {
+		return false
+	}
+	key := toCodeKey(code)
+
 	seenFiles := make(map[string]struct{})
 
 	for _, workerMap := range l.workerTables {
@@ -119,7 +131,7 @@ func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
 			if _, alreadyCounted := seenFiles[file]; alreadyCounted {
 				continue
 			}
-			if _, ok := codes[code]; ok {
+			if _, ok := codes[key]; ok {
 				seenFiles[file] = struct{}{}
 				if len(seenFiles) >= n {
 					return true

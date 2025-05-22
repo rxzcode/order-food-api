@@ -1,6 +1,6 @@
 module order-food-api
 
-go 1.24
+go 1.24.3
 
 require (
 	github.com/RoaringBitmap/roaring/v2 v2.5.0
@@ -14,7 +14,12 @@ require (
 
 require (
 	github.com/bits-and-blooms/bitset v1.12.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
+	github.com/rogpeppe/go-internal v1.13.1 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 require (
@@ -39,11 +44,11 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/ini.v1 v1.67.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

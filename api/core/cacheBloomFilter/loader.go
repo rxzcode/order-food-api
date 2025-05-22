@@ -15,7 +15,7 @@ import (
 const (
 	chunkSize      = 5_000_000 // lines per chunk (adjust as needed)
 	workerCount    = 32        // concurrency level
-	bloomFalseRate = 0.00001   // false positive rate per bloom filter
+	bloomFalseRate = 0.0000001 // false positive rate per bloom filter
 )
 
 type Loader struct {
@@ -111,7 +111,6 @@ func (l *Loader) worker(localMap map[string][]*bloom.BloomFilter) {
 	}
 }
 
-// AppearsInAtLeastN returns true if code appears in at least n different files.
 func (l *Loader) AppearsInAtLeastN(code string, n int) bool {
 	seenFiles := make(map[string]struct{})
 
