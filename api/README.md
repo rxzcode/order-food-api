@@ -22,8 +22,8 @@ Compare RAM on cache types
 | Bitmap        | 965.04         | collition rate                |
 
 Note: With uint64 only encode 10 chars 0-9,A-Z
-10 chars _ 6 bits = 60 bits total → fits into 64 bits with 4 bits unused
-11 chars _ 6 bits = 66 bits > 64 bits → cannot fit without collisions
+- 10 chars _ 6 bits = 60 bits total → fits into 64 bits with 4 bits unused
+- 11 chars _ 6 bits = 66 bits > 64 bits → cannot fit without collisions
 
 ### With docker
 
