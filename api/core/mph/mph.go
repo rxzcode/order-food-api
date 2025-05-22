@@ -179,3 +179,28 @@ func nextPow2(n int) int {
 	n++
 	return n
 }
+
+type murmurSeed uint32
+
+func (m murmurSeed) hashUint64(key uint64) uint32 {
+	const c1 uint64 = 0x87c37b91114253d5
+	const c2 uint64 = 0x4cf5ad432745937f
+
+	k := key
+	k *= c1
+	k = (k << 31) | (k >> (64 - 31))
+	k *= c2
+
+	h1 := uint64(m) ^ k
+	h1 = (h1 << 27) | (h1 >> (64 - 27))
+	h1 = h1*5 + 0x52dce729
+
+	h1 ^= 8 // number of bytes processed
+	h1 ^= h1 >> 33
+	h1 *= 0xff51afd7ed558ccd
+	h1 ^= h1 >> 33
+	h1 *= 0xc4ceb9fe1a85ec53
+	h1 ^= h1 >> 33
+
+	return uint32(h1)
+}
